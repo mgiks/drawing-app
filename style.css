@@ -2,10 +2,37 @@
 
 * {
   margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  /* padding: 0;
+  box-sizing: border-box; */
+}
+
+.html {
+  width: 100%;
+  height: 100%;
 }
 
 .page {
   font-family: "Poppins", sans-serif;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.canvas {
+  /* width: 500px;
+  height: 500px; */
+  border: 1px solid black;
+}
+
+.drawing-settings {
+  display: flex;
+  justify-content: flex-start;
+  width: 500px;
+}
+
+.brush-settings {
+  display: flex;
 }

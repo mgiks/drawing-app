@@ -1,13 +1,22 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="html">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link rel="stylesheet" />
+    <title>Drawing App</title>
+    <link rel="stylesheet" href="style.css" />
     <script src="script.js" type="module"></script>
   </head>
   <body class="page">
-    <canvas></canvas>
+    <div id="pointerPosition">sdjf</div>
+    <canvas width="500" height="500" id="canvas" class="canvas"></canvas>
+    <div id="drawingSettings" class="drawing-settings">
+      <div class="brush-settings">
+        <p>Brush size</p>
+        <button id="brushSizeDecrementer">-</button>
+        <div id="brushSize">10</div>
+        <button id="brushSizeIncrementer">+</button>
+      </div>
+    </div>
   </body>
 </html>
