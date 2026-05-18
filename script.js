@@ -1,8 +1,13 @@
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
 const brushSizeDisplay = document.getElementById("brushSize");
 const brushSizeIncrementer = document.getElementById("brushSizeIncrementer");
 const brushSizeDecrementer = document.getElementById("brushSizeDecrementer");
+const clearCanvasButton = document.getElementById("clearCanvasButton");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+clearCanvasButton.addEventListener("click", () => {
+  ctx.reset();
+});
 
 let brushSize = 10;
 let prevX;
