@@ -8,14 +8,17 @@
     <script src="script.js" type="module"></script>
   </head>
   <body class="page">
-    <div id="pointerPosition">sdjf</div>
     <canvas width="500" height="500" id="canvas" class="canvas"></canvas>
-    <div id="drawingSettings" class="drawing-settings">
-      <div class="brush-settings">
+    <div id="drawingControls" class="drawing-controls">
+      <div class="brush-resizer">
         <p>Brush size</p>
-        <button id="brushSizeDecrementer">-</button>
-        <div id="brushSize">10</div>
-        <button id="brushSizeIncrementer">+</button>
+        <button id="brushSizeDecrementer" class="brush-resizer__button">
+          -
+        </button>
+        <div id="brushSize" class="brush-resizer__value">10</div>
+        <button id="brushSizeIncrementer" class="brush-resizer__button">
+          +
+        </button>
       </div>
     </div>
   </body>

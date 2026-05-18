@@ -1,34 +1,41 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-const pointerPositionDiv = document.getElementById("pointerPosition");
-const brushSize = document.getElementById("brushSize");
+const brushSizeDisplay = document.getElementById("brushSize");
 const brushSizeIncrementer = document.getElementById("brushSizeIncrementer");
 const brushSizeDecrementer = document.getElementById("brushSizeDecrementer");
 
-let circleSize = 10;
+let brushSize = 10;
+let prevX;
+let prevY;
 
 brushSizeIncrementer.addEventListener("click", () => {
-  circleSize += 5;
+  brushSize += 5;
   updateBrushSizeDisplay();
 });
 
 brushSizeDecrementer.addEventListener("click", () => {
-  if (circleSize <= 5) {
+  if (brushSize <= 5) {
     return;
   }
-  circleSize -= 5;
+  brushSize -= 5;
   updateBrushSizeDisplay();
 });
 
 const updateBrushSizeDisplay = () => {
-  brushSize.textContent = circleSize;
+  brushSizeDisplay.textContent = brushSize;
 };
 
 const drawCircleAtMousePosition = (ev) => {
   const x = ev.offsetX;
   const y = ev.offsetY;
-  pointerPositionDiv.textContent = `X: ${x}; Y: ${y}`;
-  drawCircle(x, y, circleSize, "red");
+  drawCircle(x, y, brushSize / 2, "red");
+
+  if (prevX !== undefined && prevY !== undefined) {
+    drawLine(prevX, prevY, x, y);
+  }
+
+  prevX = x;
+  prevY = y;
 };
 
 const drawCircle = (x, y, radius, color) => {
@@ -38,24 +45,26 @@ const drawCircle = (x, y, radius, color) => {
   ctx.fill();
 };
 
-canvas.addEventListener("click", drawCircleAtMousePosition);
-
-canvas.addEventListener("pointerdown", () => {
-  startDrawing();
-});
-
-canvas.addEventListener("pointerup", () => {
-  stopDrawing();
-});
-
-document.addEventListener("pointerup", () => {
-  stopDrawing();
-});
+const drawLine = (fromX, fromY, toX, toY) => {
+  ctx.beginPath();
+  ctx.moveTo(fromX, fromY);
+  ctx.lineTo(toX, toY);
+  ctx.lineWidth = brushSize;
+  ctx.strokeStyle = "red";
+  ctx.stroke();
+};
 
 const startDrawing = () => {
+  drawCircleAtMousePosition;
   canvas.addEventListener("pointermove", drawCircleAtMousePosition);
 };
 
 const stopDrawing = () => {
+  prevX = undefined;
+  prevY = undefined;
   canvas.removeEventListener("pointermove", drawCircleAtMousePosition);
 };
+
+canvas.addEventListener("pointerdown", startDrawing);
+canvas.addEventListener("pointerup", stopDrawing);
+document.addEventListener("pointerup", stopDrawing);

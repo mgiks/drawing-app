@@ -2,8 +2,8 @@
 
 * {
   margin: 0;
-  /* padding: 0;
-  box-sizing: border-box; */
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .html {
@@ -22,17 +22,22 @@
 }
 
 .canvas {
-  /* width: 500px;
-  height: 500px; */
   border: 1px solid black;
 }
 
-.drawing-settings {
+.drawing-controls {
   display: flex;
   justify-content: flex-start;
   width: 500px;
 }
 
-.brush-settings {
+.brush-resizer {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+.brush-resizer__button {
+  width: 1.75rem;
+  height: 1.75rem;
 }
