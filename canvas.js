@@ -1,4 +1,4 @@
-import { getBrushSize } from "./brush.js";
+import { getBrushSize, getBrushColor } from "./brush.js";
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -11,25 +11,25 @@ export function setupCanvas() {
       data: [],
       redoIndex: -1,
     },
-    addLineDataToCurrentStrokePoint(fromX, fromY, toX, toY, brushSize, color) {
+    addLineDataToCurrentStrokePoint(fromX, fromY, toX, toY) {
       const dataPoint = {
         type: "line",
         fromX: fromX,
         fromY: fromY,
         toX: toX,
         toY: toY,
-        color: color,
-        lineWidth: brushSize,
+        color: getBrushColor(),
+        lineWidth: getBrushSize(),
       };
       this.currentStrokePoint.data.push(dataPoint);
     },
-    addCircleDataToCurrentStrokePoint(x, y, color, brushSize) {
+    addCircleDataToCurrentStrokePoint(x, y) {
       const dataPoint = {
         type: "circle",
         x: x,
         y: y,
-        color: color,
-        radius: brushSize / 2,
+        color: getBrushColor(),
+        radius: getBrushSize() / 2,
       };
       this.currentStrokePoint.data.push(dataPoint);
     },
@@ -104,12 +104,13 @@ function draw(drawingManager) {
   return (ev) => {
     const x = ev.offsetX;
     const y = ev.offsetY;
-    const color = "red";
     const brushSize = getBrushSize();
+    const color = getBrushColor();
 
-    const circleRadius = brushSize / 2;
+    const lineWidth = brushSize;
+    const radius = brushSize / 2;
 
-    drawCircle(x, y, circleRadius, color);
+    drawCircle(x, y, radius, color);
 
     const prevData = drawingManager.getCurrentDataFromCurrentStrokePoint();
 
@@ -117,19 +118,12 @@ function draw(drawingManager) {
       const prevX = prevData.x;
       const prevY = prevData.y;
 
-      drawLine(prevX, prevY, x, y, brushSize, color);
+      drawLine(prevX, prevY, x, y, lineWidth, color);
 
-      drawingManager.addLineDataToCurrentStrokePoint(
-        prevX,
-        prevY,
-        x,
-        y,
-        brushSize,
-        color,
-      );
+      drawingManager.addLineDataToCurrentStrokePoint(prevX, prevY, x, y);
     }
 
-    drawingManager.addCircleDataToCurrentStrokePoint(x, y, color, brushSize);
+    drawingManager.addCircleDataToCurrentStrokePoint(x, y);
   };
 }
 
