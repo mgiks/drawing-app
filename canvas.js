@@ -9,6 +9,7 @@ export function setupCanvas() {
       parent: null,
       children: [],
       data: [],
+      redoIndex: -1,
     },
     addLineDataToCurrentStrokePoint(fromX, fromY, toX, toY, brushSize, color) {
       const dataPoint = {
@@ -38,7 +39,9 @@ export function setupCanvas() {
         parent: this.currentStrokePoint,
         children: [],
         data: [],
+        redoIndex: -1,
       };
+      this.currentStrokePoint.redoIndex++;
       this.currentStrokePoint.children.push(child);
       this.currentStrokePoint = child;
     },
@@ -67,6 +70,7 @@ export function setupCanvas() {
 
   setupClearButton(drawingManager);
   setupUndoButton(drawingManager);
+  setupRedoButton(drawingManager);
 }
 
 function setupClearButton(drawingManager) {
@@ -131,7 +135,6 @@ function draw(drawingManager) {
 
 function setupUndoButton(drawingManager) {
   const undoButton = document.getElementById("undoButton");
-  let undoOffset = 1;
 
   const undo = () => {
     if (drawingManager.currentStrokePoint.parent === null) {
@@ -149,7 +152,30 @@ function setupUndoButton(drawingManager) {
   undoButton.addEventListener("click", undo);
 }
 
-function drawFromStrokePoint(lastLeaf) {
+function setupRedoButton(drawingManager) {
+  const redoButton = document.getElementById("redoButton");
+
+  const redo = () => {
+    const children = drawingManager.currentStrokePoint.children;
+
+    if (children.length === 0) {
+      return;
+    }
+
+    ctx.reset();
+
+    drawingManager.currentStrokePoint =
+      drawingManager.currentStrokePoint.children[
+        drawingManager.currentStrokePoint.redoIndex
+      ];
+
+    drawFromStrokePoint(drawingManager.currentStrokePoint);
+  };
+
+  redoButton.addEventListener("click", redo);
+}
+
+const drawFromStrokePoint = (lastLeaf) => {
   if (
     lastLeaf === null ||
     lastLeaf.type === "clear" ||
@@ -176,4 +202,4 @@ function drawFromStrokePoint(lastLeaf) {
   }
 
   drawFromStrokePoint(lastLeaf.parent);
-}
+};
