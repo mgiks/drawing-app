@@ -61,6 +61,19 @@ export function setupCanvas() {
     canvas.addEventListener("pointermove", drawFunc);
   });
 
+  // Drawing handling for mobile devices
+  canvas.addEventListener("touchstart", (ev) => {
+    ev.preventDefault();
+
+    for (const changedTouch of event.changedTouches) {
+      const x = changedTouch.offsetX;
+      const y = changedTouch.offsetY;
+      const color = getBrushColor();
+      const brushSize = getBrushSize();
+      drawCircle(x, y, brushSize / 2, color);
+    }
+  });
+
   [canvas, document].forEach((el) => {
     el.addEventListener("pointerup", (ev) => {
       ev.stopPropagation();
