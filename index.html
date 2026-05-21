@@ -8,7 +8,6 @@
     <script src="script.js" type="module"></script>
   </head>
   <body class="page">
-    <canvas width="500" height="500" id="canvas" class="canvas"></canvas>
     <div id="drawingControls" class="drawing-controls">
       <div class="brush-resizer">
         <button id="brushSizeDecrementer" class="brush-resizer__button">
@@ -27,6 +26,13 @@
       <button id="clearCanvasButton" class="drawing-controls__clear-button">
         Clear
       </button>
+    </div>
+    <div id="canvasContainer" class="canvas-container">
+      <canvas width="500" height="500" id="canvas" class="canvas"></canvas>
+      <div
+        id="resizeCorner"
+        class="resize-corner resize-corner--left-top"
+      ></div>
     </div>
   </body>
 </html>

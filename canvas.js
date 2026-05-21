@@ -84,6 +84,7 @@ export function setupCanvas() {
   setupClearButton(drawingManager);
   setupUndoButton(drawingManager);
   setupRedoButton(drawingManager);
+  setupResizeCorner(drawingManager);
 }
 
 function setupClearButton(drawingManager) {
@@ -210,3 +211,41 @@ const drawFromStrokePoint = (lastLeaf) => {
 
   drawFromStrokePoint(lastLeaf.parent);
 };
+
+function setupResizeCorner(drawingManager) {
+  const resizeCorner = document.getElementById("resizeCorner");
+  const canvas = document.getElementById("canvas");
+  const canvasContainer = document.getElementById("canvasContainer");
+  const canvasContainerPosition = canvasContainer.getBoundingClientRect();
+
+  resizeCorner.addEventListener("pointerdown", (ev) => {
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    const startX = ev.pageX;
+    const startY = ev.pageY;
+
+    const drag = (ev) => {
+      ev.preventDefault();
+      const newWidth = canvasWidth + (ev.pageX - startX);
+      const newHeight = canvasHeight + (ev.pageY - startY);
+
+      canvasContainer.style.width = newWidth + 2 + "px";
+      canvasContainer.style.height = newHeight + 2 + "px";
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+
+      drawFromStrokePoint(drawingManager.currentStrokePoint);
+    };
+
+    const pointerUp = () => {
+      document.removeEventListener("pointermove", drag);
+      document.removeEventListener("pointerup", pointerUp);
+      canvas.removeEventListener("pointerup", pointerUp);
+    };
+
+    document.addEventListener("pointermove", drag);
+    document.addEventListener("pointerup", pointerUp);
+    canvas.addEventListener("pointerup", pointerUp);
+  });
+}
