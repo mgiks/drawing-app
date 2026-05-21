@@ -192,6 +192,8 @@ const drawFromStrokePoint = (lastLeaf) => {
     return;
   }
 
+  drawFromStrokePoint(lastLeaf.parent);
+
   for (let dataPoint of lastLeaf.data) {
     switch (dataPoint.type) {
       case "circle":
@@ -208,8 +210,6 @@ const drawFromStrokePoint = (lastLeaf) => {
         );
     }
   }
-
-  drawFromStrokePoint(lastLeaf.parent);
 };
 
 function setupResizeCorner(drawingManager) {
