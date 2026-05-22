@@ -84,7 +84,7 @@ export function setupCanvas() {
   setupClearButton(drawingManager);
   setupUndoButton(drawingManager);
   setupRedoButton(drawingManager);
-  setupResizeCorner(drawingManager);
+  setupResizers(drawingManager);
 }
 
 function setupClearButton(drawingManager) {
@@ -183,7 +183,7 @@ function setupRedoButton(drawingManager) {
   redoButton.addEventListener("click", redo);
 }
 
-const drawFromStrokePoint = (lastLeaf) => {
+const drawFromStrokePoint = (lastLeaf, offsetX, offsetY) => {
   if (
     lastLeaf === null ||
     lastLeaf.type === "clear" ||
@@ -192,33 +192,90 @@ const drawFromStrokePoint = (lastLeaf) => {
     return;
   }
 
-  drawFromStrokePoint(lastLeaf.parent);
+  if (!offsetX) {
+    offsetX = 0;
+  }
+
+  if (!offsetY) {
+    offsetY = 0;
+  }
+
+  drawFromStrokePoint(lastLeaf.parent, offsetX, offsetY);
 
   for (let dataPoint of lastLeaf.data) {
     switch (dataPoint.type) {
       case "circle":
-        drawCircle(dataPoint.x, dataPoint.y, dataPoint.radius, dataPoint.color);
+        const x = dataPoint.x + offsetX;
+        const y = dataPoint.y + offsetY;
+        drawCircle(x, y, dataPoint.radius, dataPoint.color);
         break;
       case "line":
-        drawLine(
-          dataPoint.fromX,
-          dataPoint.fromY,
-          dataPoint.toX,
-          dataPoint.toY,
-          dataPoint.lineWidth,
-          dataPoint.color,
-        );
+        const fromX = dataPoint.fromX + offsetX;
+        const fromY = dataPoint.fromY + offsetY;
+        const toX = dataPoint.toX + offsetX;
+        const toY = dataPoint.toY + offsetY;
+        drawLine(fromX, fromY, toX, toY, dataPoint.lineWidth, dataPoint.color);
+        break;
     }
   }
 };
 
-function setupResizeCorner(drawingManager) {
-  const resizeCorner = document.getElementById("resizeCorner");
+const offsetFromStrokePoint = (lastLeaf, offsetX, offsetY) => {
+  if (
+    lastLeaf === null ||
+    lastLeaf.type === "clear" ||
+    lastLeaf.parent === null
+  ) {
+    return;
+  }
+
+  if (!offsetX) {
+    offsetX = 0;
+  }
+
+  if (!offsetY) {
+    offsetY = 0;
+  }
+
+  offsetFromStrokePoint(lastLeaf.parent, offsetX, offsetY);
+
+  console.log(offsetX);
+
+  for (let dataPoint of lastLeaf.data) {
+    switch (dataPoint.type) {
+      case "circle":
+        const x = dataPoint.x + offsetX;
+        const y = dataPoint.y + offsetY;
+        dataPoint.x = x;
+        dataPoint.y = y;
+        break;
+      case "line":
+        const fromX = dataPoint.fromX + offsetX;
+        const fromY = dataPoint.fromY + offsetY;
+        const toX = dataPoint.toX + offsetX;
+        const toY = dataPoint.toY + offsetY;
+        dataPoint.fromX = fromX;
+        dataPoint.fromY = fromY;
+        dataPoint.toX = toX;
+        dataPoint.toY = toY;
+        break;
+    }
+  }
+};
+
+function setupResizers(drawingManager) {
+  const resizeCornerBottomRight = document.getElementById(
+    "resizeCornerBottomRight",
+  );
+  const resizeCornerTopRight = document.getElementById("resizeCornerTopRight");
+  const resizeCornerTopLeft = document.getElementById("resizeCornerTopLeft");
+  const resizeCornerBottomLeft = document.getElementById(
+    "resizeCornerBottomLeft",
+  );
   const canvas = document.getElementById("canvas");
   const canvasContainer = document.getElementById("canvasContainer");
-  const canvasContainerPosition = canvasContainer.getBoundingClientRect();
 
-  resizeCorner.addEventListener("pointerdown", (ev) => {
+  resizeCornerBottomRight.addEventListener("pointerdown", (ev) => {
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
 
@@ -227,8 +284,8 @@ function setupResizeCorner(drawingManager) {
 
     const drag = (ev) => {
       ev.preventDefault();
-      const newWidth = canvasWidth + (ev.pageX - startX);
-      const newHeight = canvasHeight + (ev.pageY - startY);
+      const newWidth = Math.max(canvasWidth + (ev.pageX - startX), 100);
+      const newHeight = Math.max(canvasHeight + (ev.pageY - startY), 100);
 
       canvasContainer.style.width = newWidth + 2 + "px";
       canvasContainer.style.height = newHeight + 2 + "px";
@@ -239,6 +296,147 @@ function setupResizeCorner(drawingManager) {
     };
 
     const pointerUp = () => {
+      document.removeEventListener("pointermove", drag);
+      document.removeEventListener("pointerup", pointerUp);
+      canvas.removeEventListener("pointerup", pointerUp);
+    };
+
+    document.addEventListener("pointermove", drag);
+    document.addEventListener("pointerup", pointerUp);
+    canvas.addEventListener("pointerup", pointerUp);
+  });
+
+  resizeCornerTopRight.addEventListener("pointerdown", (ev) => {
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    const startX = ev.pageX;
+    const startY = ev.pageY;
+    let xDiff = startX;
+    let yDiff = startY;
+
+    const canvasContainerTop = window.getComputedStyle(canvasContainer).top;
+
+    const drag = (ev) => {
+      ev.preventDefault();
+      xDiff = ev.pageX - startX;
+      yDiff = startY - ev.pageY;
+
+      const newWidth = Math.max(canvasWidth + xDiff, 100);
+      const newHeight = Math.max(canvasHeight + yDiff, 100);
+
+      if (newHeight > 100) {
+        canvasContainer.style.top =
+          Number.parseInt(canvasContainerTop) + -yDiff + "px";
+      }
+
+      canvasContainer.style.width = newWidth + 2 + "px";
+      canvasContainer.style.height = newHeight + 2 + "px";
+
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+
+      drawFromStrokePoint(drawingManager.currentStrokePoint, 0, yDiff);
+    };
+
+    const pointerUp = () => {
+      offsetFromStrokePoint(drawingManager.currentStrokePoint, 0, yDiff);
+      document.removeEventListener("pointermove", drag);
+      document.removeEventListener("pointerup", pointerUp);
+      canvas.removeEventListener("pointerup", pointerUp);
+    };
+
+    document.addEventListener("pointermove", drag);
+    document.addEventListener("pointerup", pointerUp);
+    canvas.addEventListener("pointerup", pointerUp);
+  });
+
+  resizeCornerTopLeft.addEventListener("pointerdown", (ev) => {
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    const startX = ev.pageX;
+    const startY = ev.pageY;
+    let xDiff = startX;
+    let yDiff = startY;
+
+    const canvasContainerTop = window.getComputedStyle(canvasContainer).top;
+    const canvasContainerLeft = window.getComputedStyle(canvasContainer).left;
+
+    const drag = (ev) => {
+      ev.preventDefault();
+      xDiff = startX - ev.pageX;
+      yDiff = startY - ev.pageY;
+
+      const newWidth = Math.max(canvasWidth + xDiff, 100);
+      const newHeight = Math.max(canvasHeight + yDiff, 100);
+
+      if (newHeight > 100) {
+        canvasContainer.style.top =
+          Number.parseInt(canvasContainerTop) + -yDiff + "px";
+      }
+
+      if (newWidth > 100) {
+        canvasContainer.style.left =
+          Number.parseInt(canvasContainerLeft) + -xDiff + "px";
+      }
+
+      canvasContainer.style.width = newWidth + 2 + "px";
+      canvasContainer.style.height = newHeight + 2 + "px";
+
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+
+      drawFromStrokePoint(drawingManager.currentStrokePoint, xDiff, yDiff);
+    };
+
+    const pointerUp = () => {
+      offsetFromStrokePoint(drawingManager.currentStrokePoint, xDiff, yDiff);
+      document.removeEventListener("pointermove", drag);
+      document.removeEventListener("pointerup", pointerUp);
+      canvas.removeEventListener("pointerup", pointerUp);
+    };
+
+    document.addEventListener("pointermove", drag);
+    document.addEventListener("pointerup", pointerUp);
+    canvas.addEventListener("pointerup", pointerUp);
+  });
+
+  resizeCornerBottomLeft.addEventListener("pointerdown", (ev) => {
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    const startX = ev.pageX;
+    const startY = ev.pageY;
+    let xDiff = startX;
+    let yDiff = startY;
+
+    const canvasContainerLeft = window.getComputedStyle(canvasContainer).left;
+
+    const drag = (ev) => {
+      ev.preventDefault();
+      xDiff = startX - ev.pageX;
+      yDiff = ev.pageY - startY;
+
+      const newWidth = Math.max(canvasWidth + xDiff, 100);
+      const newHeight = Math.max(canvasHeight + yDiff, 100);
+
+      if (newWidth > 100) {
+        canvasContainer.style.left =
+          Number.parseInt(canvasContainerLeft) + -xDiff + "px";
+      }
+
+      canvasContainer.style.width = newWidth + 2 + "px";
+      canvasContainer.style.height = newHeight + 2 + "px";
+
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+
+      drawFromStrokePoint(drawingManager.currentStrokePoint, xDiff, 0);
+    };
+
+    const pointerUp = (ev) => {
+      offsetFromStrokePoint(drawingManager.currentStrokePoint, xDiff);
       document.removeEventListener("pointermove", drag);
       document.removeEventListener("pointerup", pointerUp);
       canvas.removeEventListener("pointerup", pointerUp);

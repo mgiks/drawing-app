@@ -68,10 +68,31 @@
 .resize-corner {
   position: absolute;
   background-color: red;
-  height: 25px;
-  width: 25px;
+  height: 10px;
+  width: 10px;
+}
+
+.resize-corner--bottom-right {
   right: 0;
   bottom: 0;
+  cursor: nwse-resize;
+}
+
+.resize-corner--bottom-left {
+  left: 0;
+  bottom: 0;
+  cursor: nesw-resize;
+}
+
+.resize-corner--top-right {
+  right: 0;
+  top: 0;
+  cursor: nesw-resize;
+}
+
+.resize-corner--top-left {
+  left: 0;
+  top: 0;
   cursor: nwse-resize;
 }
 
@@ -79,7 +100,7 @@
   position: absolute;
   width: 502px;
   height: 502px;
-  left: calc(50% - 250px);
   top: calc(50% - 250px);
+  left: calc(50% - 250px);
   user-select: none;
 }
